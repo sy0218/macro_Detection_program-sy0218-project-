@@ -9,7 +9,7 @@ from kafka import KafkaProducer
 
 def input_events(broker, topic, username):
     dev = InputDevice('/dev/input/event2')
-    producer = KafkaProducer(bootstrap_servers=[broker]) # 프로듀서 객체 생성
+    producer = KafkaProducer(bootstrap_servers=broker) # 프로듀서 객체 생성
 
     try:
         for event in dev.read_loop():
@@ -24,7 +24,7 @@ def input_events(broker, topic, username):
 if __name__ == "__main__":
     username=os.getenv('USER')
     today=datetime.now().strftime('%Y%m%d')
-    broker_address = '192.168.56.10:9092' # kafka 브로커 주소
+    broker_address = ['192.168.56.10:9092', '192.168.56.11:9092', '192.168.56.12:9092'] # kafka 브로커 주소
     topic_name = f"key_log_{today}" # 토픽명
 
     input_events(broker_address, topic_name ,username)
