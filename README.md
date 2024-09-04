@@ -18,4 +18,6 @@
    ex) ./create_keylog_topic.sh {today_date}
    ```
 2. `kafka_consumer/mp_kafka_consumer.py` bootstrap_servers, topic, output_file, consum_group 인자 넣어주기
-   ```sh                                                                                                 ex) ./mp_kafka_consumer.py 192.168.56.10:9092,192.168.56.11:9092,192.168.56.12:9092 key_log_20240830 /data/keyboard_sc/row_data/mp_keylog_20240830.txt mp_keylog_20240830                                   ```
+   ```sh
+   ex) ./mp_kafka_consumer.py 192.168.56.10:9092,192.168.56.11:9092,192.168.56.12:9092 key_log_20240830 /data/keyboard_sc/row_data/mp_keylog_20240830.txt mp_keylog_20240830
+   ```
