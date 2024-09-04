@@ -34,7 +34,13 @@ def main(servers, topic, output_file, consum_group):
     admin_client = KafkaAdminClient(bootstrap_servers=servers) # api 호출을 위한 객체 생성
     topic_metadata = admin_client.describe_topics([topic])[0]
     partitions = topic_metadata.get('partitions', [])
-    print(partitions)
+
+    # 멱득성 보장을 위해 __SUCCESS__ 파일 삭제
+    success_file_path = os.path.join(os.path.dirname(output_file), '__SUCCESS__')
+    if os.path.exists(output_file):
+        os.remove(output_file)
+    if os.path.exists(success_file_path):
+        os.remove(success_file_path)
 
     # 병렬 처리
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -50,22 +56,22 @@ def main(servers, topic, output_file, consum_group):
         # 모든 스레드 완료시까지 기다림
         concurrent.futures.wait(consumer_jobs)
 
+    # 모든 작업 완료시 __SUCCESS__ 파일 생성 ( airflow 센서를 위해 )
+    with open(success_file_path, 'w') as success_file:
+        success_file.write('')
+
 
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
 
     args = sys.argv[1:]
-    # 인자가 3개가 아니면 종료
+    # 인자가 4개가 아니면 종료
     if len(args) != 4:
         print(f"사용법: {script_name} <bootstrap_servers> <topic> <output_file> <consum_group>")
         sys.exit(1)
 
     # 각 인자를 변수로 지정
     servers, topic, output_file, consum_group = args
-
-    # output_file이 존재하면 삭제하여 멱등성 보장
-    if os.path.exists(output_file):
-        os.remove(output_file)
 
     # main 함수 호출
     main(servers, topic, output_file, consum_group)
