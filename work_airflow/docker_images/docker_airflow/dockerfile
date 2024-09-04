@@ -1,0 +1,46 @@
+# 기본 이미지 선택
+FROM apache/airflow:2.9.3-python3.8
+
+# 환경 변수 설정
+ENV AIRFLOW_HOME=/opt/airflow
+
+# Airflow의 실행 사용자 설정
+USER root
+
+# 필요한 패키지 설치
+RUN apt-get update \
+    && apt-get install -y \
+        gcc \
+        libffi-dev \
+        libpq-dev \
+        build-essential \
+        vim \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 사용자 권한을 Airflow 사용자로 변경
+USER airflow
+
+# 그룹에게도 권한 주기
+RUN chmod -R g+rwx /opt/airflow
+
+# Airflow 설치와 관련된 기본 설정
+COPY requirements.txt $AIRFLOW_HOME/requirements.txt
+RUN pip install --no-cache-dir -r $AIRFLOW_HOME/requirements.txt
+USER root
+
+# Airflow 데이터베이스 초기화 및 사용자 생성
+RUN airflow db init && \
+    airflow users create \
+        --username admin \
+        --password admin \
+        --firstname sy \
+        --lastname ju \
+        --role Admin \
+        --email admin@example.org
+
+# 데이터 저장 디렉토리 생성
+RUN mkdir -p /opt/airflow/data
+
+# Airflow 시작!!!
+CMD ["airflow", "webserver"]

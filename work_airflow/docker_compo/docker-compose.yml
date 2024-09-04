@@ -1,0 +1,30 @@
+version: '3.7'
+######### airflow env #########
+x-environment: &airflow_environment
+    AIRFLOW__CORE__EXECUTOR: "SequentialExecutor"
+    AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: "False"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: "sqlite:////opt/airflow/airflow.db"
+    AIRFLOW__CORE__STORE_DAG_CODE: "True"
+    AIRFLOW__CORE__STORE_SERIALIZED_DAGS: "True"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+    AIRFLOW__WEBSERVER__RBAC: "False"
+######### airflow env #########
+services:
+  airflow:
+    build: /data/keyboard_sc/work_airflow/docker_images/docker_airflow
+    image: airflow/airflow_sy0218:2.9.3
+    container_name: airflow_container
+    ports:
+      - "9898:8080"
+    volumes:
+      - /data/keyboard_sc/work_airflow/dag_airflow/:/opt/airflow/dags/
+      - /data/keyboard_sc/row_data:/data/keyboard_sc/row_data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - keylog_airflow
+    environment: *airflow_environment
+
+networks:
+  keylog_airflow:
+    name: keylog_airflow
