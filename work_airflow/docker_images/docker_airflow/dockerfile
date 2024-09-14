@@ -42,5 +42,8 @@ RUN airflow db init && \
 # 데이터 저장 디렉토리 생성
 RUN mkdir -p /opt/airflow/data
 
+# ssl 인증키 파일경로
+RUN sed -i "s|^web_server_ssl_cert =|web_server_ssl_cert = /opt/airflow/pem_dir/airflow_cert.pem|" $AIRFLOW_HOME/airflow.cfg && sed -i "s|^web_server_ssl_key =|web_server_ssl_key = /opt/airflow/pem_dir/airflow_key.pem|" $AIRFLOW_HOME/airflow.cfg
+
 # Airflow 시작!!!
 CMD ["airflow", "webserver"]

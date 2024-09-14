@@ -19,6 +19,7 @@ services:
       - "9898:8080"
     volumes:
       - /data/keyboard_sc/work_airflow/dag_airflow/:/opt/airflow/dags/
+      - /data/keyboard_sc/work_airflow/pem_dir/:/opt/airflow/pem_dir/
       - /data/keyboard_sc/row_data:/data/keyboard_sc/row_data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
