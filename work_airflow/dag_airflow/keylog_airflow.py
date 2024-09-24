@@ -18,7 +18,7 @@ dag = DAG(
 def _keylog_xcom(**kwargs):
     xcom_key = kwargs['ti']
     execution_date = kwargs['execution_date']
-    execution_date = kwargs['execution_date'] - dt.timedelta(days=1) # 하루 뺴기
+    #execution_date = kwargs['execution_date'] - dt.timedelta(days=1) # 하루 뺴기
     execution_date = execution_date.strftime('%Y%m%d') # 날짜를 원하는 형식으로 변환
     xcom_key.xcom_push(key='row_dir', value='/data/keyboard_sc/row_data/keylog')
     xcom_key.xcom_push(key='batch_date', value=execution_date)
@@ -71,7 +71,7 @@ keylog_preprocesing = SSHOperator(
 # hive 웨어하우스 적재하는 SSHOperator
 keylog_to_hive = SSHOperator(
     task_id="to_hive",
-    ssh_conn_id='apserver1_ssh',
+    ssh_conn_id='apserver_ssh',
     command=(
         "bash /data/keyboard_sc/hive/hadoop_to_hive.sh "
         "{{ ti.xcom_pull(task_ids='push_xcom', key='row_dir') }} "
