@@ -14,7 +14,7 @@ def _ppc_key_active(key_active_str):
 key_active_udf = udf(_ppc_key_active, StringType())
 
 
-def main(file_name, file_dir):
+def main(file_name, file_dir, hdfs_file_name):
     # Spark 세션 생성
     spark = SparkSession.builder.appName("DataProcessing").master("local[*]").getOrCreate()
     # 파일 경로
@@ -36,22 +36,29 @@ def main(file_name, file_dir):
     df = df.select('key_log_time','key_active','user_id')
     df.show(truncate=False)
 
-    # 파일 저장 경로 및 Parquet 형식으로 저장
+    # 파일 저장 경로
     output_path = os.path.dirname(input_file.replace("file://", ""))
+
+    # 멱등성 보장 ( 하둡 데이터 존재시 삭제 )
+    check_cmd = subprocess.run(["hdfs", "dfs", "-test", "-e", f"{output_path}/*.parquet"], check=False)
+    if check_cmd.returncode == 0:
+        subprocess.run(["hdfs", "dfs", "-rm", f"{output_path}/*.parquet"], check=True)
+
+    # Parquet 형식으로 저장
     df.write.mode("overwrite").parquet(output_path)
 
     # 스파크 세션 종료
     spark.stop()
 
     # hdfs에서 파일 이름 변경
-    subprocess.run(["hdfs", "dfs", "-mv", f"{output_path}/*.parquet", f"{output_path}/key_log.parquet"], check=True)
+    subprocess.run(["hdfs", "dfs", "-mv", f"{output_path}/*.parquet", f"{output_path}/{hdfs_file_name}"], check=True)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     # 인자 두개 아니면 종료
-    if len(args) != 2:
-        print("사용법 : py <파일명> <파일경로>")
+    if len(args) != 3:
+        print("사용법 : py <파일명> <파일경로> <저장 파일명>")
         sys.exit(1)
 
-    file_name, file_dir = args
-    main(file_name, file_dir)
+    file_name, file_dir, hdfs_file_name = args
+    main(file_name, file_dir, hdfs_file_name)
