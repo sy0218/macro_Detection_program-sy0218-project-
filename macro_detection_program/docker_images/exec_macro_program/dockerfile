@@ -1,0 +1,23 @@
+# 베이스 이미지
+FROM python:3.10-slim
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY ./requirements.txt /app
+COPY ./run_macro_pg.py /app
+# 의존성 설치
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+RUN mkdir -p /app/postgres /app/keylog_functions /app/model_materials
+COPY ./postgres_hook.py /app/postgres
+COPY ./keylog_ft.py /app/keylog_functions
+# 모델 및 산출물을 저장할 디렉토리 생성
+
+# 스크립트 실행 명령어 설정
+ENTRYPOINT ["python", "./run_macro_pg.py"]

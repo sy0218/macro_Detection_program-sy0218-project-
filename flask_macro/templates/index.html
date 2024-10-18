@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .pagination {
+            margin: 20px 0;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px;
+        }
+        nav ul {
+            list-style-type: none; /* 기본 목록 스타일 제거 */
+            padding: 0; /* 기본 패딩 제거 */
+            margin: 20px 0; /* 위아래 여백 추가 */
+        }
+        nav ul li {
+            display: inline; /* 수평 정렬 */
+            margin: 0 10px; /* 각 메뉴 간격 조절 */
+        }
+    </style>
+    <script>
+        let currentPage = 1; // 현재 페이지 변수
+        const rowsPerPage = 100; // 페이지당 행 수
+        let allData = []; // 모든 데이터 배열
+        let consistencyData = []; // consistencyData 배열
+
+        function fetchData() {
+            const query = document.getElementById('query-input').value;
+            if (!query) {
+                alert("검색 날짜 입력해주세요 ~ <YYYYMMDD>.");
+                return; // 함수 종료
+            }
+            fetch(`/get-data?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    allData = data; // 가져온 데이터 저장
+                    displayData(); // 데이터 표시
+                })
+                .catch(error => {
+                    alert("Error fetching data: " + error);
+                });
+        }
+
+        function displayData() {
+            const tableBody = document.getElementById('data-table-body');
+            tableBody.innerHTML = ''; // 기존 데이터 초기화
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedData = allData.slice(startIndex, endIndex);
+
+            paginatedData.forEach(row => {
+                const newRow = tableBody.insertRow();
+                Object.values(row).forEach(text => {
+                    const newCell = newRow.insertCell();
+                    newCell.textContent = text; // 각 셀에 데이터 추가
+                });
+            });
+
+            updatePagination(); // 페이지네이션 업데이트
+        }
+
+
+        function updatePagination() {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = ''; // 기존 페이지 번호 초기화
+
+            const pageCount = Math.ceil(allData.length / rowsPerPage);
+            for (let i = 1; i <= pageCount; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.onclick = () => {
+                    currentPage = i; // 현재 페이지 변경
+                    displayData(); // 데이터 표시
+                };
+                paginationContainer.appendChild(button); // 버튼 추가
+            }
+        }
+
+        function fetchConsistencyData() {
+            const dateInput = document.getElementById('consistency-date-input').value; // 날짜 입력 값 가져오기
+            if (!dateInput) {
+                alert("날짜를 입력해주세요."); // 입력 값 확인
+                return;
+            }
+            fetch(`/get_consistency_data?date=${encodeURIComponent(dateInput)}`) // 날짜 쿼리 파라미터로 전송
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('consistency-table-body');
+                    tableBody.innerHTML = ''; // 기존 데이터 초기화
+
+                    data.forEach(row => {
+                        const newRow = tableBody.insertRow();
+                        Object.values(row).forEach(text => {
+                            const newCell = newRow.insertCell();
+                            newCell.textContent = text; // 각 셀에 데이터 추가
+                        });
+                    });
+                })
+                .catch(error => {
+                    alert("Error fetching consistency data: " + error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>메인 페이지</h1>
+    <nav>
+        <ul>
+            <li><a href="/model_creation">모델 생성</a></li> <!-- 모델 생성 메뉴 링크 -->
+            <li><a href="https://192.168.219.20:9898">에어플로우 UI</a></li> <!-- 에어플로우 ui 링크 -->
+        </ul>
+    </nav>
+
+
+    <h2>배치처리 데이터 검증</h2>
+    <input type="text" id="consistency-date-input" placeholder="검증 날짜 입력 <YYYYMMDD>" />
+    <button onclick="fetchConsistencyData()">일관성 데이터 가져오기</button>
+    <table>
+        <thead>
+            <tr>
+                <th>원시데이터 행</th>
+                <th>전처리데이터 행</th>
+                <th>원시데이터 필드 갯수</th>
+                <th>날짜</th>
+            </tr>
+        </thead>
+        <tbody id="consistency-table-body">
+            <!-- 데이터가 여기에 추가됩니다. -->
+        </tbody>
+    </table>
+
+
+    <h2>데이터 가져오기</h2>
+    <input type="text" id="query-input" placeholder="검색 날짜 입력 <YYYYMMDD>" />
+    <button onclick="fetchData()">데이터 가져오기</button>
+    <table>
+        <thead>
+            <tr>
+                <th>아이디</th>
+                <th>모델 탐지 결과</th>
+                <th>동일 키 로그 텀 비율</th>
+                <th>날짜</th>
+                <!-- 필요한 만큼 추가 -->
+            </tr>
+        </thead>
+        <tbody id="data-table-body">
+            <!-- 데이터가 여기에 추가됩니다. -->
+        </tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+</body>
+</html>

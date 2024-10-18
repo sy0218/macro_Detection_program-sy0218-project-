@@ -9,7 +9,8 @@ x-environment: &airflow_environment
     AIRFLOW__CORE__STORE_SERIALIZED_DAGS: "True"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
     AIRFLOW__WEBSERVER__RBAC: "False"
-    AIRFLOW_CONN_APSERVER_SSH: "ssh://root:nds1101@192.168.56.10:22"
+    AIRFLOW_CONN_APSERVER_SSH: "ssh://root:nds1101@192.168.219.20:22"
+    AIRFLOW_CONN_APSERVER_POSTGRES: "postgresql://sy0218:sy0218@192.168.219.20:5432/sy0218"
 ######### airflow env #########
 services:
   airflow:
@@ -26,6 +27,29 @@ services:
     networks:
       - keylog_airflow
     environment: *airflow_environment
+
+  macro_detection_program:
+    build: /data/keyboard_sc/macro_detection_program/docker_images/exe_macro_program
+    image: exe_macro_dt_pg:1
+    container_name: Macro_Detection_Program
+    restart: "no"
+
+  make_macro_detection_program_model:
+    build: /data/keyboard_sc/macro_detection_program/docker_images/mk_macro_program
+    image: macro_dt_pg:0.0.1
+    container_name: Make_Macro_Detection_Program_Model
+    restart: "no"
+  
+  flask_macro_application:
+    build: /data/keyboard_sc/flask_macro
+    image: flask_macro_app:0.0.1
+    container_name: macro_app_container
+    ports:
+      - "7777:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - keylog_airflow
 
 networks:
   keylog_airflow:

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Script</title>
+    <style>
+        .spinner {
+            display: none; /* 기본적으로 숨김 */
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+    </style>
+    <script>
+        function runScript() {
+            const arg = document.getElementById('arg').value; // 입력값 가져오기
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+
+            fetch('/run-script', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ arg: arg }) // JSON 형식으로 전송
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data); // 팝업으로 결과 표시
+            })
+            .catch(error => {
+                alert("Error: " + error);
+            })
+            .finally(() => {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>모델 학습</h1>
+    <input type="text" id="arg" placeholder="모델 버전 입력" required>
+    <button onclick="runScript()">모델 학습 실행</button>
+
+    <!-- 스피너 -->
+    <div class="spinner" id="spinner"></div>
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+</body>
+</html>

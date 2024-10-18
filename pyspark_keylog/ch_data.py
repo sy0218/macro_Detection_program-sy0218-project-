@@ -14,11 +14,11 @@ def _ppc_key_active(key_active_str):
 key_active_udf = udf(_ppc_key_active, StringType())
 
 
-def main(file_name, file_dir, hdfs_file_name):
+def main(file_name, file_dir, batch_date, hdfs_file_name):
     # Spark 세션 생성
     spark = SparkSession.builder.appName("DataProcessing").master("local[*]").getOrCreate()
     # 파일 경로
-    input_file = f"file://{file_dir}/{file_name}"
+    input_file = f"file://{file_dir}/{batch_date}/{file_name}"
 
     # 데이터 읽기
     df = spark.read.text(input_file)
@@ -56,9 +56,9 @@ def main(file_name, file_dir, hdfs_file_name):
 if __name__ == "__main__":
     args = sys.argv[1:]
     # 인자 두개 아니면 종료
-    if len(args) != 3:
-        print("사용법 : py <파일명> <파일경로> <저장 파일명>")
+    if len(args) != 4:
+        print("사용법 : py <파일명> <파일경로> <배치 날짜> <저장 파일명>")
         sys.exit(1)
 
-    file_name, file_dir, hdfs_file_name = args
-    main(file_name, file_dir, hdfs_file_name)
+    file_name, file_dir, batch_date ,hdfs_file_name = args
+    main(file_name, file_dir, batch_date, hdfs_file_name)
