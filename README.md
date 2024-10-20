@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
 
 1. **`push_xcom`** : airflow 파이프라인 변수를 위한 xcom push
-2. **`wait_keylog_rowdata`** : 카프카 컨슈머를 통핸 원시 데이터 수집 완료까지 대기하는 센서
+2. **`wait_keylog_rowdata`** : 카프카 컨슈머 데이터 수집 완료까지 대기하는 센서
 3. **`preprocessing_use_spark`** : pyspark를 통한 원시 데이터 전처리
 4. **`to_hive`** : 전처리 완료된 원시데이터 웨어하우스(hive)에 적재
 5. **`detection_macro`** : 정재된 데이터를 가지고 매크로 탐지 프로그램 적용후 최종본 postgresql에 적재 
